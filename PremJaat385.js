@@ -41,7 +41,7 @@
         document.oncopy = null;
     }
 
-    allowRightClick()
+    allowRightClick();
 
     var topbarElement = document.querySelector('.topbar.back-warning');
     if (topbarElement) {
