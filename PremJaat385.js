@@ -1,7 +1,7 @@
 (function () {
     // Function to get AngularJS scope by element class or ID
     function getScope(elementClass) {
-        var el = document.querySelector(elementClass); // Adjust this to match an appropriate selector
+        var el = document.querySelector(elementClass);
         if (el) {
             var scope = angular.element(el).scope();
             return scope;
@@ -22,7 +22,7 @@
                     // window.open(fullAttemptLink, '_blank');
                     openPopUp(fullAttemptLink, 0, 0, 2);
                 }
-            });//
+            });
 
         } else {
             console.log('Scope not found');
@@ -42,7 +42,6 @@
     const Add_Custom_Style = css => document.head.appendChild(document.createElement("style")).innerHTML = css
     const script = document.createElement('script');
 
-    // Assuming this code is inside content_script.js
     function createHeader() {
         const headerContainer = document.getElementById('header-container');
 
@@ -219,8 +218,8 @@
         }
 
         .right-div img {
-            height: 30px; /* Example height for the image inside right-div */
-            width: auto; /* Adjust width as needed */
+            height: 30px;
+            width: auto;
             padding-top: 5px;
             position: relative;
             top: -6px;
@@ -245,5 +244,73 @@
             divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
         }
     }
-    
+
+    // Select all <a> tags with id="prev_1" from 1 to 60
+    for (let i = 1; i <= 60; i++) {
+        if (i != 1) {
+            let prevLink = document.getElementById(`prev_${i}`);
+            if (prevLink) {
+                prevLink.removeAttribute('style');
+                prevLink.setAttribute("onclick", "return ChangeQues('" + (i - 1) + "');");
+            }
+        }
+        if (i != 60) {
+            let nextLink = document.getElementById(`next_${i}`);
+            if (nextLink) {
+                nextLink.removeAttribute('onclick');
+                nextLink.setAttribute("onclick", "return ChangeQues('" + (i + 1) + "');");
+            }
+        }
+    }
+
+    // Find all elements with class 'mainbuttons'
+    var mainButtons = document.querySelectorAll('.mainbuttons');
+
+    // Loop through each '.mainbuttons' element
+    mainButtons.forEach(function (mainButton) {
+        // Find all <b> elements inside the current '.mainbuttons' element
+        var boldElements = mainButton.querySelectorAll('div b');
+
+        // Loop through each <b> element found
+        boldElements.forEach(function (boldElement) {
+            // Add a click event listener to each <b> element
+            boldElement.addEventListener('click', function () {
+                // Find the parent div with id starting with "quespanel_"
+                var parentDiv = this.closest('div[id^="quespanel_"]');
+
+                if (!parentDiv) {
+                    console.error('Parent div with id starting with "quespanel_" not found.');
+                    return;
+                }
+
+                // Find the sub div with class "mainquestion" inside the parent div
+                var mainQuestionDiv = parentDiv.querySelector('.mainquestion');
+
+                if (!mainQuestionDiv) {
+                    console.error('Sub div with class "mainquestion" not found inside the parent div.');
+                    return;
+                }
+
+                // Extract the visible text content from the mainquestion div
+                var questionText = mainQuestionDiv.textContent.trim();
+
+                // Copy text to clipboard using Clipboard API
+                navigator.clipboard.writeText(questionText)
+                    .then(function () {
+                        console.log('Text copied to clipboard:', questionText);
+                        // Change text color to red temporarily
+                        boldElement.style.color = 'red';
+                        setTimeout(function () {
+                            boldElement.style.color = 'black';
+                        }, 1000); // 1000 milliseconds = 1 second
+                    })
+                    .catch(function (err) {
+                        console.error('Failed to copy text to clipboard:', err);
+                    });
+            });
+        });
+    });
+
+
+
 })();
