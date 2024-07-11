@@ -238,20 +238,12 @@
         }
     `);
     
-    function injectOnclick() {
-    // Loop through question IDs from Q_1 to Q_60
-        for (let i = 1; i <= 60; i++) {
-            let questionId = "Q_" + i;
-            let divElement = document.getElementById(questionId);
-            if (divElement) {
-                divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
-            }
+    for (let i = 1; i <= 60; i++) {
+        let questionId = "Q_" + i;
+        let divElement = document.getElementById(questionId);
+        if (divElement) {
+            divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
         }
     }
-
-    // Execute the function when the DOM is ready
-    document.addEventListener("DOMContentLoaded", function () {
-        injectOnclick();
-    });
-
+    
 })();
