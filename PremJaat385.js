@@ -29,20 +29,6 @@
         }
     }
 
-    function allowRightClick() {
-        document.addEventListener('contextmenu', function (event) {
-            event.stopPropagation();
-        }, true);
-
-        // Allow text selection
-        document.onselectstart = null;
-
-        // Allow copying
-        document.oncopy = null;
-    }
-
-    allowRightClick();
-
     var topbarElement = document.querySelector('.topbar.back-warning');
     if (topbarElement) {
         topbarElement.addEventListener('click', function () {
@@ -251,5 +237,21 @@
             line-height: 18px;
         }
     `);
+    
+    function injectOnclick() {
+    // Loop through question IDs from Q_1 to Q_60
+        for (let i = 1; i <= 60; i++) {
+            let questionId = "Q_" + i;
+            let divElement = document.getElementById(questionId);
+            if (divElement) {
+                divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
+            }
+        }
+    }
+
+    // Execute the function when the DOM is ready
+    document.addEventListener("DOMContentLoaded", function () {
+        injectOnclick();
+    });
 
 })();
