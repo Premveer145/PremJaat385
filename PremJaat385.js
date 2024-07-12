@@ -297,7 +297,7 @@
                 // Copy text to clipboard using Clipboard API
                 navigator.clipboard.writeText(questionText)
                     .then(function () {
-                        // console.log('Text copied to clipboard:', questionText);
+                        console.log('Text copied to clipboard:', questionText);
                         // Change text color to red temporarily
                         boldElement.style.color = 'red';
                         setTimeout(function () {
