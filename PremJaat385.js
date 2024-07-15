@@ -1,4 +1,8 @@
 (function () {
+
+    //  #############################  Functions To be Injected  ############################# //
+
+
     // Function to get AngularJS scope by element class or ID
     function getScope(elementClass) {
         var el = document.querySelector(elementClass);
@@ -11,14 +15,13 @@
 
     // Function to get the data from AngularJS scope
     function getCurrentExamsQuiz() {
-        var scope = getScope('.ng-scope'); // Use a class that is commonly applied by AngularJS
+        var scope = getScope('.ng-scope');
         if (scope) {
             var currentExamsQuiz = scope.CurrentExamsQuiz;
-            // AttemptLink FeedbackLink 
-            // Process the data to open AttemptLink
+
             currentExamsQuiz.forEach(exam => {
                 if (exam.AttemptLink != "") {
-                    let fullAttemptLink = `http://glauniversity.in:8092/student/${exam.AttemptLink}`;
+                    let fullAttemptLink = `http://glauniversity.in:8092/student/${exam.AttemptLink}`; // AttemptLink FeedbackLink 
                     // window.open(fullAttemptLink, '_blank');
                     openPopUp(fullAttemptLink, 0, 0, 2);
                 }
@@ -38,34 +41,26 @@
         console.log('Topbar element not found');
     }
 
-    // Add Custom CSS - Function
-    const Add_Custom_Style = css => document.head.appendChild(document.createElement("style")).innerHTML = css
-    const script = document.createElement('script');
-
-    function createHeader() {
+    // Function to set Top Bar
+    function setupTopBar() {
         const headerContainer = document.getElementById('header-container');
 
-        // Create header div
         const header = document.createElement('div');
         header.className = 'header';
 
-        // Create logo image
         const logo = document.createElement('img');
         logo.src = 'https://i.postimg.cc/Cx9Rrz3z/GLA-Icon.png';
         logo.alt = 'GLA University Logo';
         header.appendChild(logo);
 
-        // Create header title div
         const headerTitle = document.createElement('div');
         headerTitle.className = 'header-title';
         headerTitle.innerText = 'GLA University - Online Examination System';
         header.appendChild(headerTitle);
 
-        // Create header icons div
         const headerIcons = document.createElement('div');
         headerIcons.className = 'header-icons';
 
-        // Create minimize icon
         const minimizeIcon = document.createElement('img');
         minimizeIcon.src = 'https://i.postimg.cc/Wb4zJvZ4/Navigation.png';
         minimizeIcon.alt = 'Minimize';
@@ -73,13 +68,14 @@
 
         header.appendChild(headerIcons);
 
-        // Append the header to the container
         document.body.appendChild(header);
+
+        document.body.style.paddingTop = 30 + 'px';
     }
 
+    // Function to set Bottom Bar
     function setupBottomBar() {
 
-        // Create elements
         var bottomDiv = document.createElement('div');
         bottomDiv.className = 'bottom-div';
 
@@ -110,7 +106,6 @@
         imgPowerIcon.alt = 'Power Icon';
         imgPowerIcon.style.paddingRight = '10px';
 
-        // Append elements
         rightDiv.appendChild(imgBatteryIcon);
         rightDiv.appendChild(imgWifiIcon);
         rightDiv.appendChild(imgEngIcon);
@@ -120,10 +115,10 @@
         bottomDiv.appendChild(imgGLAIcon);
         bottomDiv.appendChild(rightDiv);
 
-        // Append bottomDiv to body or any desired parent element
         document.body.appendChild(bottomDiv);
 
-        // Function to update date and time
+        document.body.style.paddingBottom = 40 + 'px';
+
         function updateDateTime() {
             var dt = new Date();
             var hours = dt.getHours().toString().padStart(2, '0');
@@ -135,17 +130,135 @@
             pDateTime.innerHTML = '<span style="font-weight: 600;">' + formattedTime + '</span><br>' + formattedDate;
         }
 
-        // Update time immediately on setup
         updateDateTime();
 
-        // Update time every minute
-        setInterval(updateDateTime, 60000); // Update every 60 seconds
+        setInterval(updateDateTime, 60000);
     }
 
-    createHeader();
-    setupBottomBar();
-    document.body.style.paddingBottom = 40 + 'px';
-    document.body.style.paddingTop = 30 + 'px';
+    // Function to enable Change Questions and Previous button
+    function enableChangeQues() {
+        for (let i = 1; i <= 60; i++) {
+            let questionId = "Q_" + i;
+            let divElement = document.getElementById(questionId);
+            if (divElement) {
+                divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
+            }
+        }
+
+        for (let i = 1; i <= 60; i++) {
+            if (i != 1) {
+                let prevLink = document.getElementById(`prev_${i}`);
+                if (prevLink) {
+                    prevLink.removeAttribute('style');
+                    prevLink.setAttribute("onclick", "return ChangeQues('" + (i - 1) + "');");
+                }
+            }
+            if (i != 60) {
+                let nextLink = document.getElementById(`next_${i}`);
+                if (nextLink) {
+                    nextLink.removeAttribute('onclick');
+                    nextLink.setAttribute("onclick", "return ChangeQues('" + (i + 1) + "');");
+                }
+            }
+        }
+    }
+
+    // Function to copy Text by single text click
+    function smartAutoCopy() {
+
+        var mainButtons = document.querySelectorAll('.mainbuttons');
+
+        mainButtons.forEach(function (mainButton) {
+
+            var boldElements = mainButton.querySelectorAll('div b');
+
+            boldElements.forEach(function (boldElement) {
+
+                boldElement.addEventListener('click', function () {
+
+                    var parentDiv = this.closest('div[id^="quespanel_"]');
+
+                    if (!parentDiv) {
+                        console.error('Parent div with id starting with "quespanel_" not found.');
+                        return;
+                    }
+
+                    var mainQuestionDiv = parentDiv.querySelector('.mainquestion');
+
+                    if (!mainQuestionDiv) {
+                        console.error('Sub div with class "mainquestion" not found inside the parent div.');
+                        return;
+                    }
+
+                    var questionText = mainQuestionDiv.innerText.trim();
+
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+
+                        // Copy text to clipboard using Clipboard API
+                        navigator.clipboard.writeText(questionText)
+                            .then(function () {
+                                console.log(questionText);
+
+                                boldElement.style.color = 'red';
+                                setTimeout(function () {
+                                    boldElement.style.color = 'black';
+                                }, 1000);
+                            })
+                            .catch(function (err) {
+                                console.error('Failed to copy text to clipboard:', err);
+                            });
+                    } else {
+
+                        // Copy text to clipboard using Copy Command
+                        var tempTextArea = document.createElement('textarea');
+                        tempTextArea.value = questionText;
+                        document.body.appendChild(tempTextArea);
+
+                        tempTextArea.select();
+                        tempTextArea.setSelectionRange(0, 99999);
+
+                        try {
+                            document.execCommand('copy');
+                            console.log(questionText);
+
+                            boldElement.style.color = 'red';
+                            setTimeout(function () {
+                                boldElement.style.color = 'black';
+                            }, 1000);
+                        } 
+                        catch (err) {
+                            console.error('Failed to copy text to clipboard:', err);
+                        }
+
+                        document.body.removeChild(tempTextArea);
+
+                    }
+                });
+            });
+        });
+
+    }
+
+    // Function to enable selection and clicks
+    function allowRightClick() {
+        document.addEventListener('contextmenu', function (event) {
+            event.stopPropagation();
+        }, true);
+        document.onselectstart = null;
+        document.oncopy = null;
+        document.onkeypress = document.onkeydown = document.onkeyup = null;
+    }
+
+    // Function to enable clipboard copy
+    function allowClipboardCopy() {
+        $('body').unbind('cut copy paste drop drag');
+    }
+
+    // Add Custom CSS - Function
+    const Add_Custom_Style = css => document.head.appendChild(document.createElement("style")).innerHTML = css
+    const script = document.createElement('script');
+
     Add_Custom_Style(`
 
         body {
@@ -218,8 +331,8 @@
         }
 
         .right-div img {
-            height: 30px;
-            width: auto;
+            height: 30px; /* Example height for the image inside right-div */
+            width: auto; /* Adjust width as needed */
             padding-top: 5px;
             position: relative;
             top: -6px;
@@ -236,81 +349,16 @@
             line-height: 18px;
         }
     `);
-    
-    for (let i = 1; i <= 60; i++) {
-        let questionId = "Q_" + i;
-        let divElement = document.getElementById(questionId);
-        if (divElement) {
-            divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
-        }
-    }
-
-    // Select all <a> tags with id="prev_1" from 1 to 60
-    for (let i = 1; i <= 60; i++) {
-        if (i != 1) {
-            let prevLink = document.getElementById(`prev_${i}`);
-            if (prevLink) {
-                prevLink.removeAttribute('style');
-                prevLink.setAttribute("onclick", "return ChangeQues('" + (i - 1) + "');");
-            }
-        }
-        if (i != 60) {
-            let nextLink = document.getElementById(`next_${i}`);
-            if (nextLink) {
-                nextLink.removeAttribute('onclick');
-                nextLink.setAttribute("onclick", "return ChangeQues('" + (i + 1) + "');");
-            }
-        }
-    }
-
-    // Find all elements with class 'mainbuttons'
-    var mainButtons = document.querySelectorAll('.mainbuttons');
-
-    // Loop through each '.mainbuttons' element
-    mainButtons.forEach(function (mainButton) {
-        // Find all <b> elements inside the current '.mainbuttons' element
-        var boldElements = mainButton.querySelectorAll('div b');
-
-        // Loop through each <b> element found
-        boldElements.forEach(function (boldElement) {
-            // Add a click event listener to each <b> element
-            boldElement.addEventListener('click', function () {
-                // Find the parent div with id starting with "quespanel_"
-                var parentDiv = this.closest('div[id^="quespanel_"]');
-
-                if (!parentDiv) {
-                    console.error('Parent div with id starting with "quespanel_" not found.');
-                    return;
-                }
-
-                // Find the sub div with class "mainquestion" inside the parent div
-                var mainQuestionDiv = parentDiv.querySelector('.mainquestion');
-
-                if (!mainQuestionDiv) {
-                    console.error('Sub div with class "mainquestion" not found inside the parent div.');
-                    return;
-                }
-
-                // Extract the visible text content from the mainquestion div
-                var questionText = mainQuestionDiv.textContent.trim();
-
-                // Copy text to clipboard using Clipboard API
-                navigator.clipboard.writeText(questionText)
-                    .then(function () {
-                        console.log('Text copied to clipboard:', questionText);
-                        // Change text color to red temporarily
-                        boldElement.style.color = 'red';
-                        setTimeout(function () {
-                            boldElement.style.color = 'black';
-                        }, 1000); // 1000 milliseconds = 1 second
-                    })
-                    .catch(function (err) {
-                        console.error('Failed to copy text to clipboard:', err);
-                    });
-            });
-        });
-    });
 
 
+    //  #############################  Functions Called  ############################# //
+
+    setupTopBar();
+    setupBottomBar();
+    enableChangeQues();
+    smartAutoCopy();
+    allowRightClick();
+    allowClipboardCopy();
 
 })();
+        
