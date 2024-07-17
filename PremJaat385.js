@@ -13,32 +13,66 @@
         return null;
     }
 
-    // Function to get the data from AngularJS scope
-    function getCurrentExamsQuiz() {
-        var scope = getScope('.ng-scope');
-        if (scope) {
-            var currentExamsQuiz = scope.CurrentExamsQuiz;
+    let showAlert = false;
+    var scope = getScope('.ng-scope');
 
-            currentExamsQuiz.forEach(exam => {
-                if (exam.AttemptLink != "") {
-                    let fullAttemptLink = `http://glauniversity.in:8092/student/${exam.AttemptLink}`; // AttemptLink FeedbackLink 
-                    // window.open(fullAttemptLink, '_blank');
-                    openPopUp(fullAttemptLink, 0, 0, 2);
+    if (scope) {
+
+        scope.AttemptExam = function (x) {
+            if (x.Status == 'Attempt' && x.CanAttempt) {
+
+                if (showAlert) {
+                    alert("Please Install GLA Safe Exam Browser to Attempt this Exam.");
+                    return false;
                 }
-            });
 
-        } else {
-            console.log('Scope not found');
+                if (x.AttemptPopUp) {
+
+                    openPopUp(x.AttemptLink, 0, 0, 2);
+
+                }
+                else {
+                    window.location = x.AttemptLink;
+                }
+            }
+            if (x.Status == 'Finished' && x.FeedbackLink != '') {
+                openPopUp(x.FeedbackLink, 0, 0, 2);
+            }
         }
-    }
 
-    var topbarElement = document.querySelector('.topbar.back-warning');
-    if (topbarElement) {
-        topbarElement.addEventListener('click', function () {
-            getCurrentExamsQuiz();
-        });
-    } else {
-        console.log('Topbar element not found');
+        scope.OpenExam = function (x) {
+
+            if (x.StatusText == "Attempt") {
+                if (showAlert) {
+                    alert("Please Install GLA Safe Exam Browser to Attempt this Exam.");
+                    return false;
+                }
+
+                var httpreq = {
+                    method: 'POST',
+                    url: 'DashboardMain.aspx/SetTimeOnLogin',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8',
+                        'dataType': 'json'
+                    },
+                    data: { 'quizNo': x.QuizNo }
+                }
+                $http(httpreq).then(function (response) {
+                    if (response.data.d.Status == "Success") {
+
+                    }
+                    else {
+                        alert(response.data.d.Message);
+                        return false;
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                    console.log("Error");
+                });
+                openPopUp(x.EncId, 0, 0, 2);
+            }
+        }
+
     }
 
     // Function to set Top Bar
@@ -137,29 +171,35 @@
 
     // Function to enable Change Questions and Previous button
     function enableChangeQues() {
-        for (let i = 1; i <= 60; i++) {
-            let questionId = "Q_" + i;
-            let divElement = document.getElementById(questionId);
-            if (divElement) {
-                divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
-            }
-        }
+        if (document.getElementById("MaxQues")) {
 
-        for (let i = 1; i <= 60; i++) {
-            if (i != 1) {
-                let prevLink = document.getElementById(`prev_${i}`);
-                if (prevLink) {
-                    prevLink.removeAttribute('style');
-                    prevLink.setAttribute("onclick", "return ChangeQues('" + (i - 1) + "');");
+            let MaxQues = document.getElementById("MaxQues").value
+
+            for (let i = 1; i <= MaxQues; i++) {
+                let questionId = "Q_" + i;
+                let divElement = document.getElementById(questionId);
+                if (divElement) {
+                    divElement.setAttribute("onclick", "return ChangeQues('" + i + "');");
                 }
             }
-            if (i != 60) {
-                let nextLink = document.getElementById(`next_${i}`);
-                if (nextLink) {
-                    nextLink.removeAttribute('onclick');
-                    nextLink.setAttribute("onclick", "return ChangeQues('" + (i + 1) + "');");
+
+            for (let i = 1; i <= MaxQues; i++) {
+                if (i != 1) {
+                    let prevLink = document.getElementById(`prev_${i}`);
+                    if (prevLink) {
+                        prevLink.removeAttribute('style');
+                        prevLink.setAttribute("onclick", "return ChangeQues('" + (i - 1) + "');");
+                    }
+                }
+                if (i != MaxQues) {
+                    let nextLink = document.getElementById(`next_${i}`);
+                    if (nextLink) {
+                        nextLink.removeAttribute('onclick');
+                        nextLink.setAttribute("onclick", "return ChangeQues('" + (i + 1) + "');");
+                    }
                 }
             }
+
         }
     }
 
@@ -226,7 +266,7 @@
                             setTimeout(function () {
                                 boldElement.style.color = 'black';
                             }, 1000);
-                        } 
+                        }
                         catch (err) {
                             console.error('Failed to copy text to clipboard:', err);
                         }
@@ -361,4 +401,3 @@
     allowClipboardCopy();
 
 })();
-        
