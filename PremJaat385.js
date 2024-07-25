@@ -397,7 +397,7 @@
     setupBottomBar();
     enableChangeQues();
     smartAutoCopy();
-    allowRightClick();
+    // allowRightClick();
     allowClipboardCopy();
 
 })();
